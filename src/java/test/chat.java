@@ -33,7 +33,7 @@ import org.apache.tomcat.util.log.*;
  *
  * @author ZJX
  */
-@ServerEndpoint(value = "/websocket/chat")
+@ServerEndpoint("/chat")
 public class chat {
     
 //}
@@ -116,10 +116,12 @@ public class chat {
         msg.setClient(this);
 //        String filteredMessage = String.format("%s: %s",nickname, message.toString());
         
-        String filteredMessage = String.format("%s: %s",msg.getFrom(), msg.getContent());
-        System.out.println(filteredMessage);
+//        String filteredMessage = String.format("%s: %s",msg.getFrom(), msg.getContent());
+//        System.out.println(filteredMessage);
 //        broadcast(filteredMessage);
             broadcast(message);
+//            broadcast("aaaa");
+
     }
 
 
@@ -161,6 +163,18 @@ public class chat {
         jsonObjectMessage.put("type", String.valueOf(message.getType()));
 //        jsonObjectMessage.put("time", message.getTime().toString());
         return jsonObjectMessage.toString();
+    }
+    
+    public Msge setJsonMessage(String s)
+    {
+        JSONObject js = JSON.parseObject(s);
+        
+        msg.setFrom(js.getString("from"));
+        msg.setTo(js.getString("to"));
+        msg.setContent(js.getString("content"));
+        msg.setType(js.getIntValue("type"));
+        msg.setClient(this);
+        return msg;
     }
 }
 

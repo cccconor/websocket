@@ -22,7 +22,7 @@
     <script src="js/jquery.js" type="text/javascript"></script>
     <script src="js/jquery.min.js" type="text/javascript"></script>
     <script src="js/bootstrap.min.js" type="text/javascript"></script>
-    <script src="/js/layer.js" type="text/javascript"></script>
+<!--    <script src="/js/layer.js" type="text/javascript"></script>-->
     <style type="/text/css"><![CDATA[
         input#chat {
             width: 410px
@@ -85,9 +85,9 @@
 
         Chat.initialize = function() {
             if (window.location.protocol == 'http:') {
-                Chat.connect('ws://' + window.location.host + '/examples/websocket/chat');
+                Chat.connect('ws://' + window.location.host + '/websocket/chat');
             } else {
-                Chat.connect('wss://' + window.location.host + '/examples/websocket/chat');
+                Chat.connect('wss://' + window.location.host + '/websocket/chat');
             }
         };
 

@@ -1,0 +1,51 @@
+<!DOCTYPE html>  
+<html>  
+<head>  
+<title>HTML5 WebSocket测试</title>  
+<meta charset="UTF-8">
+</head>  
+<body>  
+    <div>
+        <input type="text" id="mymsg">
+        <button name=“Start” onclick="start()" >start</button>  
+    </div>  
+    <div id= "messages">messages</div>  
+    <script type="text/javascript">  
+        var webSocket = new WebSocket( 'ws://localhost:8080/websocket/websocket' );  
+        webSocket.onerror = function(event) {  
+            alert(event.data);  
+        };  
+        //与WebSocket建立连接  
+        webSocket.onopen = function(event) {  
+            document.getElementById('messages').innerHTML = '与服务器端建立连接';  
+        };  
+        //处理服务器返回的信息  
+        webSocket.onmessage = function(event) {  
+            document.getElementById('messages').innerHTML += '<br />'+ event.data;  
+        };  
+        function start() {  
+            var name = getQueryString("name");
+            //向服务器发送请求  
+            var str = document.getElementById('mymsg');
+//            if('oninput' in msg)
+//            {
+//                msg.addEventListener("input",getWord,false);
+//                
+//            }else
+//            {
+//                msg.onpropertychange = getWord;
+//            }
+            var msg = name +"说：" + str.value; 
+            webSocket.send(msg);  
+        }  
+        
+        function getQueryString(name) {
+    var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
+    if (result == null || result.length < 1) {
+        return "";
+    }
+    return result[1];
+}
+    </script>  
+</body>  
+</html>

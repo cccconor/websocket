@@ -4,10 +4,12 @@
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
             <file>file:/E:/softwaredata/webapps/websocket/web/index.html</file>
-            <file>file:/E:/softwaredata/webapps/websocket/src/java/test/test.java</file>
-            <file>file:/E:/softwaredata/webapps/websocket/src/java/test/chat.java</file>
             <file>file:/E:/softwaredata/webapps/websocket/web/chat.jsp</file>
-            <file>file:/E:/softwaredata/webapps/websocket/web/index2.html</file>
+            <file>file:/E:/softwaredata/webapps/websocket/src/java/test/chat.java</file>
+            <file>file:/E:/softwaredata/webapps/websocket/web/index1.html</file>
+            <file>file:/E:/softwaredata/webapps/websocket/web/bootstrap/css/bootstrap.min.css</file>
+            <file>file:/E:/softwaredata/webapps/websocket/web/newhtml.html</file>
+            <file>file:/E:/softwaredata/webapps/websocket/web/main.jsp</file>
         </group>
     </open-files>
 </project-private>

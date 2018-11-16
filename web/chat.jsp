@@ -50,7 +50,7 @@
     <script type="application/javascript">
         var str = 'ws://' + window.location.host + '/examples/websocket/chat';
 //        Console.log(str);
-
+        var name = getQueryString("name");
         var Chat = {};
         Chat.socket = null;
         Chat.connect = (function(host) {
@@ -65,6 +65,7 @@
 
             Chat.socket.onopen = function () {
                 Console.log('Info: WebSocket connection opened.');
+                onlineTip();
                 document.getElementById('chat').onkeydown = function(event) {
                     if (event.keyCode == 13) {
                         Chat.sendMessage();
@@ -76,8 +77,12 @@
                 document.getElementById('chat').onkeydown = null;
                 Console.log('Info: WebSocket closed.');
             };
+            
+            
             Chat.socket.onmessage = function (message) {
-//                var m = JSON.parse(message.data);
+                var m = JSON.parse(message.data);
+                if(parseInt(m.type)==0)
+                    addOne(m.from);
 //                alert(m.content);
                 Console.log(message.data);
             };
@@ -91,14 +96,13 @@
             }
         };
 
-        Chat.sendMessage = (function() {
-            var name = getQueryString("name");
+        Chat.sendMessage = (function() {            
             var message = document.getElementById('chat').value;
             var msg =JSON.stringify({
               type: 1,
               from: name,
               to: "",
-              str: message
+              content: message
             });
             if (message != '') {
                 Chat.socket.send(msg);
@@ -131,12 +135,78 @@
             }
         }, false);
         
+        onlineTip = function()
+        {
+            var msg =JSON.stringify({
+              type:0,
+              from: name,
+              to: "",
+              content:"online"
+            });
+            Chat.socket.send(msg);
+        }
+        
+        
         function getQueryString(name) {
     var result = window.location.search.match(new RegExp("[\?\&]" + name + "=([^\&]+)", "i"));
     if (result == null || result.length < 1) {
         return "";
     }
     return result[1];
+}
+        function addOne(name)
+        {
+            var console = document.getElementById('friendlist');
+            var p = document.createElement('input');
+            var l = document.createElement("label");
+            l.innerHTML = name+"<br>";
+            p.type = "radio";
+            p.name = "list";
+            p.vaue = name;
+//            p.style.wordWrap = 'break-word';
+            p.innerHTML = name;
+            console.appendChild(p);
+            console.appendChild(l);
+            while (console.childNodes.length > 25) {
+                console.removeChild(console.firstChild);
+            }
+            console.scrollTop = console.scrollHeight;
+        }
+        
+        function sendone()
+        {
+//            alert("sendone");
+            var toname = check();
+            console.log("选中的人："+toname);
+//            alert(toname);
+            var str = document.getElementById("sendtoone").value;
+            alert(toname+str);
+            if(str==null||str=="")
+            {
+                alert("输入的消息为空");
+            }
+            var msg =JSON.stringify({
+              type: 3,
+              from: name,
+              to: toname,
+              content: str
+            });
+            
+            console.log("发送的消息："+msg);
+            if (str != '') {
+                Chat.socket.send(msg);
+                document.getElementById('sendtoone').value = '';
+            }
+            
+        }
+        
+        function check(){
+	var radio = document.getElementsByName("list");
+	for (i=0; i<radio.length; i++) {
+		if (radio[i].checked) {
+			return(radio[i].innerHTML)
+		}
+	}
 }
     </script>
 </head>
@@ -151,5 +221,15 @@
         <div id="console"/>
     </div>
 </div>
+    <div>
+        <h3>在线用户</h3>
+        <div id="friendlist">
+            
+        </div>
+        <div id="sendToOne">
+            <input type="text" placeholder="send to one user" id="sendtoone"/>
+            <input type="button" value="send" onclick="sendone()"/>
+        </div>
+    </div>
 </body>
 </html>

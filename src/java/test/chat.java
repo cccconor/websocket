@@ -66,12 +66,13 @@ public class chat {
     private static final AtomicInteger connectionIds = new AtomicInteger(0);
     private static final Set<chat> connections =new CopyOnWriteArraySet<chat>();
 
-    private final String nickname;
+    private String nickname;
     private Session session;
     private Msge msg;
 
     public chat() {
-        nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+//        nickname = GUEST_PREFIX + connectionIds.getAndIncrement();
+        nickname = "";
         msg = new Msge();
     }
 
@@ -80,14 +81,15 @@ public class chat {
     public void start(Session session) {
         this.session = session;
         connections.add(this);
-        Msge m = new Msge();
-        m.setType(0);
-        m.setFrom(nickname);
-        m.setContent("已经上线");
-        String message = getJsonMessage(m);
+        System.out.println("新客户端上线");
+//        Msge m = new Msge();
+//        m.setType(0);
+//        m.setFrom(nickname);
+//        m.setContent("已经上线");
+//        String message = getJsonMessage(m);
 //        String message = String.format("* %s %s", nickname, "has joined.");
-        System.out.println(message);
-        broadcast(message);
+//        System.out.println(message);
+//        broadcast(message);
     }
 
 
@@ -114,13 +116,32 @@ public class chat {
         msg.setContent(jo.getString("content"));
         msg.setType(jo.getIntValue("type"));
         msg.setClient(this);
+        if(this.nickname=="")
+        this.nickname = msg.getFrom();
+        
+        System.out.println("收到来自："+nickname+"的消息"+"type:"+msg.getType());
 //        String filteredMessage = String.format("%s: %s",nickname, message.toString());
         
 //        String filteredMessage = String.format("%s: %s",msg.getFrom(), msg.getContent());
 //        System.out.println(filteredMessage);
 //        broadcast(filteredMessage);
-            broadcast(message);
+            if(msg.getType()==3)
+                //私聊消息
+                sendMsg(msg.getTo(),getJsonMessage(msg));
+            
+            else if(msg.getType()==0)
+            {
+                //新用户上线
+                onlineTip(this.nickname,message);
+                broadcast(message);
+            }
+                
+            else
+                //群消息或者用户下线
+                broadcast(message);
+//                sendmsg()
 //            broadcast("aaaa");
+            
 
     }
 
@@ -153,12 +174,74 @@ public class chat {
             }
         }
     }
+    private static void sendMsg(String to,String m)
+    {
+//        System.out.println("私聊信息：to:"+to+"message:"+m);
+        for (chat client : connections) {
+            System.out.println(client.nickname);
+            if(client.nickname.equals(to))
+            {
+                try {
+                synchronized (client) {
+                    client.session.getBasicRemote().sendText(m);
+//                    System.out.println("向"+client.nickname+"发送消息");
+                }
+            } catch (IOException e) {
+                System.out.println(e);
+//                log.debug("Chat Error: Failed to send Msge to client", e);
+                connections.remove(client);
+                try {
+                    client.session.close();
+                } catch (IOException e1) {
+                    System.out.println(e1);
+                    // Ignore
+                }
+//                String message = String.format("* %s %s",client.nickname, "has been disconnected.");
+//                broadcast(message);
+                 }
+            }
+            
+        }
+    }
+    private void onlineTip(String selfName,String msg)
+    {
+        Msge m = new Msge();
+        m.setType(0);
+       for (chat client : connections) {
+//            System.out.println(client.nickname);
+            if(!client.nickname.equals(selfName))
+            {
+//                    client.session.getBasicRemote().sendText(msg);
+                    m.setFrom(client.nickname);
+                try {
+//                synchronized (client) {
+                    session.getBasicRemote().sendText(getJsonMessage(m));
+
+//                    System.out.println("向"+client.nickname+"发送消息");
+//                }
+            } catch (IOException e) {
+                System.out.println(e);
+//                log.debug("Chat Error: Failed to send Msge to client", e);
+                connections.remove(client);
+                try {
+                    client.session.close();
+                } catch (IOException e1) {
+                    System.out.println(e1);
+                    // Ignore
+                }
+//                String message = String.format("* %s %s",client.nickname, "has been disconnected.");
+//                broadcast(message);
+                 }
+            }
+            
+        }        
+    }
     
     public String getJsonMessage(Msge message){
         //使用JSONObject方法构建Json数据
         JSONObject jsonObjectMessage = new JSONObject();
         jsonObjectMessage.put("from", String.valueOf(message.getFrom()));
-        jsonObjectMessage.put("to", new String[] {String.valueOf(message.getTo())});
+        jsonObjectMessage.put("to", String.valueOf(message.getTo()));
         jsonObjectMessage.put("content", String.valueOf(message.getContent()));
         jsonObjectMessage.put("type", String.valueOf(message.getType()));
 //        jsonObjectMessage.put("time", message.getTime().toString());
